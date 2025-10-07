@@ -1,0 +1,133 @@
+{
+  "ide": {
+    "cUF": "35",
+    "natOp": "VENDA DE MERCADORIA",
+    "mod": "55",
+    "serie": "1",
+    "nNF": "12345",
+    "dhEmi": "2025-07-10T12:00:00-03:00",
+    "tpNF": "1",
+    "idDest": "1",
+    "cMunFG": "3550308",
+    "tpImp": "1",
+    "tpEmis": "1",
+    "tpAmb": "2",
+    "finNFe": "1",
+    "indFinal": "1",
+    "indPres": "1",
+    "procEmi": "0",
+    "verProc": "1.0.0"
+  },
+  "emit": {
+    "CNPJ": "12345678000199",
+    "xNome": "Transportadora JaguareTech LTDA",
+    "xFant": "JaguareTech",
+    "IE": "123456789012",
+    "CRT": "3",
+    "enderEmit": {
+      "xLgr": "Rua do Progresso",
+      "nro": "100",
+      "xBairro": "Centro",
+      "cMun": "3550308",
+      "xMun": "São Paulo",
+      "UF": "SP",
+      "CEP": "01001000",
+      "cPais": "1058",
+      "xPais": "BRASIL",
+      "fone": "1133334444"
+    }
+  },
+  "dest": {
+    "CNPJ": "98765432000155",
+    "xNome": "Cliente Exemplo LTDA",
+    "indIEDest": "1",
+    "IE": "908070605001",
+    "email": "contato@clienteexemplo.com",
+    "enderDest": {
+      "xLgr": "Avenida das Nações Unidas",
+      "nro": "2000",
+      "xBairro": "Pinheiros",
+      "cMun": "3550308",
+      "xMun": "São Paulo",
+      "UF": "SP",
+      "CEP": "05415002",
+      "cPais": "1058",
+      "xPais": "BRASIL",
+      "fone": "1144445555"
+    }
+  },
+  "items": [
+    {
+      "prod": {
+        "cProd": "SKU123",
+        "cEAN": "7891234567890",
+        "xProd": "Monitor 27\" 4K",
+        "NCM": "85285200",
+        "CFOP": "5102",
+        "uCom": "UN",
+        "qCom": "2.0000",
+        "vUnCom": "2500.0000000000",
+        "vProd": "5000.00",
+        "cEANTrib": "7891234567890",
+        "uTrib": "UN",
+        "qTrib": "2.0000",
+        "vUnTrib": "2500.0000000000",
+        "indTot": "1",
+        "vDesc": "0.00",
+        "vFrete": "0.00",
+        "vSeg": "0.00",
+        "vOutro": "0.00"
+      },
+      "imposto": {
+        "ICMS": {
+          "ICMS00": {
+            "orig": "0",
+            "CST": "00",
+            "modBC": "3",
+            "vBC": "5000.00",
+            "pICMS": "18.00",
+            "vICMS": "900.00"
+          }
+        },
+        "PIS": {
+          "PISAliq": {
+            "CST": "01",
+            "vBC": "5000.00",
+            "pPIS": "1.65",
+            "vPIS": "82.50"
+          }
+        },
+        "COFINS": {
+          "COFINSAliq": {
+            "CST": "01",
+            "vBC": "5000.00",
+            "pCOFINS": "7.60",
+            "vCOFINS": "380.00"
+          }
+        },
+        "vTotTrib": "1362.50"
+      }
+    }
+  ],
+  "transp": {
+    "modFrete": "0"
+  },
+  "pag": {
+    "detPag": [
+      {
+        "indPag": "0",
+        "tPag": "01",
+        "vPag": "5000.00"
+      }
+    ]
+  },
+  "infAdic": {
+    "infCpl": "Documento emitido em ambiente de homologação."
+  },
+  "totalOverrides": {
+    "vPIS": "82.50",
+    "vCOFINS": "380.00",
+    "vTotTrib": "1362.50",
+    "vICMS": "900.00"
+  }
+}
