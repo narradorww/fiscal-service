@@ -7,6 +7,7 @@ Microserviço REST para emissão simulada de NF-e (MOC 4.00) e CT-e, utilizado p
 - POST `/api/cte` → Gera chave de acesso de CT-e 4.00 e devolve XML com blocos ide/emit/rem/dest/toma/vPrest/imp/infCarga/infModal.
 - POST `/api/certificate` → Recebe upload do certificado A1 (.pfx/.p12) e grava em `storage/certs/`.
 - POST `/api/certificate/mock` → Gera certificado fictício para testes internos.
+- GET `/playground` → Interface HTML para testar NF-e, CT-e e upload de certificados via navegador.
 
 Documentação interativa em `/docs` (UI) e `/docs/json` (arquivo OpenAPI).
 
@@ -286,6 +287,7 @@ Resposta CT-e segue o mesmo padrão da NF-e, expondo `cteKey`, XML completo e `a
 - Use `POST /api/certificate` com `multipart/form-data` (`file` = PFX/P12, `password` opcional) para armazenar o certificado na instância.
 - O endpoint retorna o nome sanitizado, caminho e senha informada (se houver). Restrinja permissões do diretório `storage/certs/` em produção.
 - Para validar o fluxo sem um arquivo real, chame `POST /api/certificate/mock`; um certificado fictício é gerado com senha `mock-password`.
+- Acesse `/playground` para fazer o upload manualmente e visualizar a resposta de cada endpoint.
 
 ## Testes
 

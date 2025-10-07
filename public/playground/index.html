@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Fiscal Service Playground</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f7fb;
+      color: #1f2933;
+    }
+    header {
+      background: #1f2933;
+      color: #fff;
+      padding: 24px;
+      text-align: center;
+    }
+    main {
+      max-width: 1080px;
+      margin: 24px auto;
+      padding: 0 16px 48px;
+    }
+    section {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(31, 41, 51, 0.08);
+      margin-bottom: 32px;
+      padding: 24px;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      border-radius: 8px;
+      border: 1px solid #cbd2d9;
+      padding: 12px;
+      font-family: "Fira Code", monospace;
+      font-size: 14px;
+      background: #fdfdfd;
+      resize: vertical;
+    }
+    pre {
+      background: #0b1120;
+      color: #f0f4f8;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    input[type="file"], input[type="password"] {
+      display: block;
+      margin-bottom: 16px;
+    }
+    .response {
+      margin-top: 16px;
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+    @media (min-width: 900px) {
+      .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    .note {
+      font-size: 13px;
+      color: #4b5563;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Fiscal Service Playground</h1>
+  <p>Teste a emissão de NF-e, CT-e e upload de certificados diretamente pela interface.</p>
+</header>
+<main>
+  <section id="nfe-section">
+    <h2>Emitir NF-e</h2>
+    <p class="note">Envie um payload compatível com o MOC 4.00. Você pode editar o exemplo antes de enviar.</p>
+    <textarea id="nfe-payload"></textarea>
+    <div style="margin-top: 16px;">
+      <button id="nfe-submit">Emitir NF-e</button>
+    </div>
+    <div class="response">
+      <label>Resposta:</label>
+      <pre id="nfe-response">Ainda sem requisições.</pre>
+    </div>
+  </section>
+
+  <section id="cte-section">
+    <h2>Emitir CT-e</h2>
+    <p class="note">Compatível com o leiaute 4.00. Ajuste o payload conforme necessário.</p>
+    <textarea id="cte-payload"></textarea>
+    <div style="margin-top: 16px;">
+      <button id="cte-submit">Emitir CT-e</button>
+    </div>
+    <div class="response">
+      <label>Resposta:</label>
+      <pre id="cte-response">Ainda sem requisições.</pre>
+    </div>
+  </section>
+
+  <section id="cert-section">
+    <h2>Certificado A1</h2>
+    <div class="grid grid-2">
+      <div>
+        <h3>Upload real (.pfx / .p12)</h3>
+        <form id="cert-form">
+          <label for="cert-file">Arquivo do certificado</label>
+          <input id="cert-file" type="file" name="file" accept=".pfx,.p12" required>
+          <label for="cert-password">Senha (opcional)</label>
+          <input id="cert-password" type="password" name="password" placeholder="Senha do certificado">
+          <button type="submit">Enviar certificado</button>
+        </form>
+      </div>
+      <div>
+        <h3>Mock rápido</h3>
+        <p class="note">Gera um certificado fictício em <code>storage/certs/mock-cert.pfx</code> para testes.</p>
+        <button id="mock-cert-btn">Criar certificado mock</button>
+      </div>
+    </div>
+    <div class="response">
+      <label>Resposta:</label>
+      <pre id="cert-response">Ainda sem requisições.</pre>
+    </div>
+  </section>
+</main>
+
+<script>
+  const nfePayload = document.getElementById('nfe-payload');
+  const ctePayload = document.getElementById('cte-payload');
+  const nfeResponse = document.getElementById('nfe-response');
+  const cteResponse = document.getElementById('cte-response');
+  const certResponse = document.getElementById('cert-response');
+  const certForm = document.getElementById('cert-form');
+  const mockCertBtn = document.getElementById('mock-cert-btn');
+
+  const sampleNfe = {
+    ide: {
+      cUF: '35',
+      natOp: 'VENDA DE MERCADORIA',
+      mod: '55',
+      serie: '1',
+      nNF: '12345',
+      dhEmi: '2025-07-10T12:00:00-03:00',
+      tpNF: '1',
+      idDest: '1',
+      cMunFG: '3550308',
+      tpImp: '1',
+      tpEmis: '1',
+      tpAmb: '2',
+      finNFe: '1',
+      indFinal: '1',
+      indPres: '1',
+      procEmi: '0',
+      verProc: '1.0.0'
+    },
+    emit: {
+      CNPJ: '12345678000199',
+      xNome: 'Transportadora JaguareTech LTDA',
+      xFant: 'JaguareTech',
+      IE: '123456789012',
+      CRT: '3',
+      enderEmit: {
+        xLgr: 'Rua do Progresso',
+        nro: '100',
+        xBairro: 'Centro',
+        cMun: '3550308',
+        xMun: 'São Paulo',
+        UF: 'SP',
+        CEP: '01001000',
+        cPais: '1058',
+        xPais: 'BRASIL',
+        fone: '1133334444'
+      }
+    },
+    dest: {
+      CNPJ: '98765432000155',
+      xNome: 'Cliente Exemplo LTDA',
+      indIEDest: '1',
+      IE: '908070605001',
+      email: 'contato@clienteexemplo.com',
+      enderDest: {
+        xLgr: 'Avenida das Nações Unidas',
+        nro: '2000',
+        xBairro: 'Pinheiros',
+        cMun: '3550308',
+        xMun: 'São Paulo',
+        UF: 'SP',
+        CEP: '05415002',
+        cPais: '1058',
+        xPais: 'BRASIL',
+        fone: '1144445555'
+      }
+    },
+    items: [
+      {
+        prod: {
+          cProd: 'SKU123',
+          cEAN: '7891234567890',
+          xProd: 'Monitor 27" 4K',
+          NCM: '85285200',
+          CFOP: '5102',
+          uCom: 'UN',
+          qCom: '2.0000',
+          vUnCom: '2500.0000000000',
+          vProd: '5000.00',
+          cEANTrib: '7891234567890',
+          uTrib: 'UN',
+          qTrib: '2.0000',
+          vUnTrib: '2500.0000000000',
+          indTot: '1',
+          vDesc: '0.00',
+          vFrete: '0.00',
+          vSeg: '0.00',
+          vOutro: '0.00'
+        },
+        imposto: {
+          ICMS: {
+            ICMS00: {
+              orig: '0',
+              CST: '00',
+              modBC: '3',
+              vBC: '5000.00',
+              pICMS: '18.00',
+              vICMS: '900.00'
+            }
+          },
+          PIS: {
+            PISAliq: {
+              CST: '01',
+              vBC: '5000.00',
+              pPIS: '1.65',
+              vPIS: '82.50'
+            }
+          },
+          COFINS: {
+            COFINSAliq: {
+              CST: '01',
+              vBC: '5000.00',
+              pCOFINS: '7.60',
+              vCOFINS: '380.00'
+            }
+          },
+          vTotTrib: '1362.50'
+        }
+      }
+    ],
+    transp: { modFrete: '0' },
+    pag: { detPag: [{ indPag: '0', tPag: '01', vPag: '5000.00' }] },
+    infAdic: { infCpl: 'Documento emitido em ambiente de homologação.' },
+    totalOverrides: {
+      vPIS: '82.50',
+      vCOFINS: '380.00',
+      vTotTrib: '1362.50',
+      vICMS: '900.00'
+    }
+  };
+
+  const sampleCte = {
+    ide: {
+      cUF: '35',
+      CFOP: '5351',
+      natOp: 'PREST SERV TRANSPORTE',
+      mod: '57',
+      serie: '1',
+      nCT: '67890',
+      dhEmi: '2025-07-10T12:30:00-03:00',
+      tpImp: '1',
+      tpEmis: '1',
+      tpAmb: '2',
+      tpCTe: '0',
+      procEmi: '0',
+      verProc: '1.0.0',
+      cMunEnv: '3550308',
+      xMunEnv: 'São Paulo',
+      UFEnv: 'SP',
+      modal: '01',
+      tpServ: '0',
+      indIEToma: '1'
+    },
+    emit: {
+      CNPJ: '12345678000199',
+      IE: '123456789012',
+      xNome: 'Transportadora JaguareTech LTDA',
+      xFant: 'JaguareTech',
+      enderEmit: {
+        xLgr: 'Rua do Progresso',
+        nro: '100',
+        xBairro: 'Centro',
+        cMun: '3550308',
+        xMun: 'São Paulo',
+        CEP: '01001000',
+        UF: 'SP',
+        cPais: '1058',
+        xPais: 'BRASIL',
+        fone: '1133334444'
+      }
+    },
+    rem: {
+      CNPJ: '98765432000155',
+      IE: '908070605001',
+      xNome: 'Remetente Exemplo LTDA',
+      fone: '1144445555',
+      enderReme: {
+        xLgr: 'Avenida das Nações Unidas',
+        nro: '2000',
+        xBairro: 'Pinheiros',
+        cMun: '3550308',
+        xMun: 'São Paulo',
+        CEP: '05415002',
+        UF: 'SP',
+        cPais: '1058',
+        xPais: 'BRASIL',
+        fone: '1144445555'
+      }
+    },
+    dest: {
+      CNPJ: '10293847560123',
+      IE: '554433221100',
+      xNome: 'Destinatário Industrial SA',
+      fone: '3199999999',
+      enderDest: {
+        xLgr: 'Rodovia BR-040',
+        nro: 'KM 25',
+        xBairro: 'Distrito Industrial',
+        cMun: '3106200',
+        xMun: 'Belo Horizonte',
+        CEP: '31275000',
+        UF: 'MG',
+        cPais: '1058',
+        xPais: 'BRASIL',
+        fone: '3199999999'
+      }
+    },
+    toma: {
+      toma: '4',
+      toma3: {
+        CNPJ: '74185296000188',
+        IE: '112233445566',
+        xNome: 'Tomador Logística Integrada',
+        fone: '2133334444',
+        enderToma: {
+          xLgr: 'Rua das Docas',
+          nro: '500',
+          xBairro: 'Porto',
+          cMun: '3304557',
+          xMun: 'Rio de Janeiro',
+          CEP: '20010000',
+          UF: 'RJ',
+          cPais: '1058',
+          xPais: 'BRASIL',
+          fone: '2133334444'
+        }
+      }
+    },
+    vPrest: {
+      vTPrest: '6200.00',
+      vRec: '6200.00',
+      component: [
+        { xNome: 'Frete peso', vComp: '5000.00' },
+        { xNome: 'Pedágio', vComp: '200.00' },
+        { xNome: 'Seguro', vComp: '1000.00' }
+      ]
+    },
+    imp: {
+      ICMS: {
+        ICMS00: {
+          CST: '00',
+          orig: '0',
+          pICMS: '12.00',
+          vBC: '6200.00',
+          vICMS: '744.00'
+        }
+      },
+      infAdFisco: 'Tributação normal do serviço de transporte.'
+    },
+    infCarga: {
+      vCarga: '8000.00',
+      proPred: 'Equipamentos eletrônicos',
+      infQ: [
+        { cUnid: '00', tpMed: 'KG', qCarga: '1200.000' }
+      ]
+    },
+    infModal: {
+      versaoModal: '4.00',
+      rodo: { RNTRC: '12345678' }
+    }
+  };
+
+  nfePayload.value = JSON.stringify(sampleNfe, null, 2);
+  ctePayload.value = JSON.stringify(sampleCte, null, 2);
+
+  async function submitJson(endpoint, payload, target) {
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(JSON.parse(payload))
+      });
+      const text = await res.text();
+      target.textContent = `${res.status} ${res.statusText}\n\n${text}`;
+    } catch (error) {
+      target.textContent = `Erro: ${error.message}`;
+    }
+  }
+
+  document.getElementById('nfe-submit').addEventListener('click', () => {
+    submitJson('/api/nfe', nfePayload.value, nfeResponse);
+  });
+
+  document.getElementById('cte-submit').addEventListener('click', () => {
+    submitJson('/api/cte', ctePayload.value, cteResponse);
+  });
+
+  certForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const formData = new FormData(certForm);
+    try {
+      const res = await fetch('/api/certificate', {
+        method: 'POST',
+        body: formData
+      });
+      const text = await res.text();
+      certResponse.textContent = `${res.status} ${res.statusText}\n\n${text}`;
+    } catch (error) {
+      certResponse.textContent = `Erro: ${error.message}`;
+    }
+  });
+
+  mockCertBtn.addEventListener('click', async () => {
+    mockCertBtn.disabled = true;
+    try {
+      const res = await fetch('/api/certificate/mock', { method: 'POST' });
+      const text = await res.text();
+      certResponse.textContent = `${res.status} ${res.statusText}\n\n${text}`;
+    } catch (error) {
+      certResponse.textContent = `Erro: ${error.message}`;
+    } finally {
+      mockCertBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

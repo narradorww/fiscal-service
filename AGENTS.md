@@ -14,6 +14,7 @@
 - `yarn test` executa Jest em modo `--runInBand`, cobrindo validação de payload e geração da chave/XML.
 - Após subir o serviço, consulte `http://localhost:3000/docs` (UI) ou `http://localhost:3000/docs/json` para o contrato OpenAPI.
 - Upload de certificados A1: `POST /api/certificate` (multipart) grava `.pfx/.p12` em `storage/certs/`; `POST /api/certificate/mock` cria um arquivo fictício para automações.
+- `http://localhost:3000/playground` oferece uma UI simples (HTML) para testar NF-e, CT-e e certificados sem precisar de `curl`.
 
 ## Coding Style & Naming Conventions
 - Two-space indent, aspas simples e ponto-e-vírgula; siga o padrão de `nfe.service.ts`.
